@@ -1,0 +1,34 @@
+# Standalone configuration for Nginx running on another host.
+# Run with: docker compose -f docker-compose.nginx.yml up -d --build
+services:
+  jira-mcp:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        format: raw
+    environment:
+      OAUTH_STORAGE_DIR: /data/oauth
+    volumes:
+      - oauth_data:/data
+    ports:
+      - "${MCP_BIND_IP:?Set MCP_BIND_IP to the internal IP of this MCP server}:8000:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  oauth_data:

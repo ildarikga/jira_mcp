@@ -1,0 +1,4 @@
+fastmcp==4.1.0
+httpx2==2.13.1
+py-key-value-aio[filetree]==0.4.6
+cryptography==50.0.2
